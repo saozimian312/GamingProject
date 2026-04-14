@@ -7,10 +7,12 @@ public class HealBlock : MonoBehaviour
 
     private float timer;
     private FallingBlockController fallingBlock;
+    private BlockVFX vfx;
 
     private void Awake()
     {
         fallingBlock = GetComponent<FallingBlockController>();
+        vfx = GetComponent<BlockVFX>();
     }
 
     private void Update()
@@ -28,6 +30,16 @@ public class HealBlock : MonoBehaviour
             if (core != null)
             {
                 core.TakeDamage(-healAmount);
+            }
+
+            if (vfx != null)
+            {
+                vfx.FlashHeal();
+            }
+
+            if (VFXManager.Instance != null)
+            {
+                VFXManager.Instance.PlayHealAura(fallingBlock.GetEffectCenter());
             }
         }
     }

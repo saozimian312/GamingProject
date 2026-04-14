@@ -8,10 +8,12 @@ public class AttackBlock : MonoBehaviour
 
     private float timer;
     private FallingBlockController fallingBlock;
+    private BlockVFX vfx;
 
     private void Awake()
     {
         fallingBlock = GetComponent<FallingBlockController>();
+        vfx = GetComponent<BlockVFX>();
     }
 
     private void Update()
@@ -24,11 +26,11 @@ public class AttackBlock : MonoBehaviour
         if (timer >= attackInterval)
         {
             timer = 0f;
-            AttackNearestEnemy();
+            ShootNearestEnemy();
         }
     }
 
-    private void AttackNearestEnemy()
+    private void ShootNearestEnemy()
     {
         EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>();
 
@@ -46,9 +48,20 @@ public class AttackBlock : MonoBehaviour
             }
         }
 
-        if (nearest != null)
+        if (nearest == null) return;
+
+        Vector3 center = fallingBlock.GetEffectCenter();
+
+        if (vfx != null)
         {
-            nearest.TakeDamage(damage);
+            vfx.FlashAttack();
+            vfx.PlayAttackLine(nearest.transform.position + Vector3.up * 0.5f);
+        }
+
+        if (VFXManager.Instance != null)
+        {
+            VFXManager.Instance.PlayAttackMuzzle(center);
+            VFXManager.Instance.SpawnAttackBullet(center, nearest, damage);
         }
     }
 }

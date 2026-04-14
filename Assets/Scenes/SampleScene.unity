@@ -1326,7 +1326,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f30d4713dd360c4eaed9ee05c2b49e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefab: {fileID: 5519507775618071238, guid: 31d46c84c26ca6e4d916216dfc90a74f, type: 3}
+  normalEnemyPrefab: {fileID: 5519507775618071238, guid: 31d46c84c26ca6e4d916216dfc90a74f, type: 3}
+  fastEnemyPrefab: {fileID: 5519507775618071238, guid: 4a8cb9c370d7f01449b92affc0ee9e7a, type: 3}
+  tankEnemyPrefab: {fileID: 5519507775618071238, guid: 60eee58cd854d9b419199c191d928519, type: 3}
   spawnPoint: {fileID: 996675420}
   targetPoint: {fileID: 1077340066}
   waveText: {fileID: 1333691404}
@@ -1601,6 +1603,9 @@ MonoBehaviour:
   offerText1: {fileID: 603824072}
   offerText2: {fileID: 2133152476}
   offerText3: {fileID: 1226745659}
+  attackMaterial: {fileID: 2100000, guid: 9bcb1a0188c6fa14f9725b0754657ee5, type: 2}
+  incomeMaterial: {fileID: 2100000, guid: 6261c93bfd1b28544bde959a6967b80f, type: 2}
+  healMaterial: {fileID: 2100000, guid: e23f8127373695d4dba6cfe95b3b7091, type: 2}
 --- !u!4 &567352121
 Transform:
   m_ObjectHideFlags: 0
@@ -1788,6 +1793,7 @@ Transform:
   - {fileID: 567352121}
   - {fileID: 1759010334}
   - {fileID: 1583004988}
+  - {fileID: 1736031933}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &720074779
@@ -3091,6 +3097,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1707222792}
   m_CullTransparentMesh: 1
+--- !u!1 &1736031931
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1736031933}
+  - component: {fileID: 1736031932}
+  m_Layer: 0
+  m_Name: VFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1736031932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736031931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5048c570407d58248ac2044ae827e785, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VFXManager
+  attackMuzzlePrefab: {fileID: 6501712328867414660, guid: 5abd7280f8c08614397986bdb084067e, type: 3}
+  attackHitPrefab: {fileID: 6501712328867414660, guid: b3f95c1519a94614d958ccd872277ed0, type: 3}
+  attackBulletPrefab: {fileID: 546216972770241142, guid: f0d2e53ca36e9e94f8c146ec7d017a8c, type: 3}
+  incomeBurstPrefab: {fileID: 1407839848872062747, guid: 2f5c0c7906d535546b624781285a1f38, type: 3}
+  healAuraPrefab: {fileID: 1407839848872062747, guid: 09695c073b453c9418435f6482ae74aa, type: 3}
+--- !u!4 &1736031933
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736031931}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 715387992}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1759010332
 GameObject:
   m_ObjectHideFlags: 0

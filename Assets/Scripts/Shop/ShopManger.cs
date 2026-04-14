@@ -15,6 +15,10 @@ public class ShopManager : MonoBehaviour
     public TMP_Text offerText2;
     public TMP_Text offerText3;
 
+    public Material attackMaterial;
+    public Material incomeMaterial;
+    public Material healMaterial;
+
     private ShopOffer[] currentOffers = new ShopOffer[3];
 
     private void Awake()
@@ -46,60 +50,31 @@ public class ShopManager : MonoBehaviour
     private void BuyOffer(int index)
     {
         if (GameStateManager.Instance != null && GameStateManager.Instance.IsGameOver)
-{
-    return;
-}
-        Debug.Log("点击购买: " + index);
-
-        if (index < 0 || index >= currentOffers.Length)
         {
-            Debug.Log("购买失败：索引错误");
             return;
         }
 
-        if (blockSpawner == null)
-        {
-            Debug.Log("购买失败：blockSpawner 没绑定");
-            return;
-        }
-
-        if (blockSpawner.HasActiveBlock())
-        {
-            Debug.Log("购买失败：当前已经有活动方块");
-            return;
-        }
+        if (index < 0 || index >= currentOffers.Length) return;
+        if (blockSpawner == null) return;
+        if (blockSpawner.HasActiveBlock()) return;
 
         ShopOffer offer = currentOffers[index];
 
-        if (gold < offer.price)
+        if (gold < offer.price) return;
+
+        if (blockSpawner.heightManager != null)
         {
-            Debug.Log("购买失败：金币不足");
-            return;
+            blockSpawner.heightManager.UpdateForNextSpawn();
         }
 
         GameObject prefab = GetPrefabByShape(offer.shapeType);
-        if (prefab == null)
-        {
-            Debug.Log("购买失败：没找到对应 prefab -> " + offer.shapeType);
-            return;
-        }
+        if (prefab == null) return;
 
-        if (blockSpawner != null && blockSpawner.heightManager != null)
-{
-    blockSpawner.heightManager.UpdateForNextSpawn();
-}
+        gold -= offer.price;
+        UpdateGoldUI();
 
-gold -= offer.price;
-UpdateGoldUI();
-
-FallingBlockController block = blockSpawner.SpawnBlock(prefab);
-        if (block == null)
-        {
-            Debug.Log("购买失败：SpawnBlock 返回 null");
-            return;
-        }
-
-        Debug.Log("已生成方块: " + block.name + " | 形状: " + offer.shapeType + " | 功能: " + offer.blockType);
+        FallingBlockController block = blockSpawner.SpawnBlock(prefab);
+        if (block == null) return;
 
         ApplyBlockType(block.gameObject, offer.blockType);
     }
@@ -170,6 +145,11 @@ FallingBlockController block = blockSpawner.SpawnBlock(prefab);
 
     private void ApplyBlockType(GameObject block, BlockType blockType)
     {
+        if (block.GetComponent<BlockVFX>() == null)
+        {
+            block.AddComponent<BlockVFX>();
+        }
+
         AttackBlock oldAttack = block.GetComponent<AttackBlock>();
         IncomeBlock oldIncome = block.GetComponent<IncomeBlock>();
         HealBlock oldHeal = block.GetComponent<HealBlock>();
@@ -182,21 +162,31 @@ FallingBlockController block = blockSpawner.SpawnBlock(prefab);
         {
             case BlockType.Attack:
                 block.AddComponent<AttackBlock>();
+                ApplyBlockMaterial(block, attackMaterial);
                 break;
 
             case BlockType.Income:
                 block.AddComponent<IncomeBlock>();
+                ApplyBlockMaterial(block, incomeMaterial);
                 break;
 
             case BlockType.Heal:
                 block.AddComponent<HealBlock>();
+                ApplyBlockMaterial(block, healMaterial);
                 break;
         }
+    }
 
-        Debug.Log("已添加功能: " + blockType);
-        Debug.Log("Attack? " + (block.GetComponent<AttackBlock>() != null));
-        Debug.Log("Income? " + (block.GetComponent<IncomeBlock>() != null));
-        Debug.Log("Heal? " + (block.GetComponent<HealBlock>() != null));
+    private void ApplyBlockMaterial(GameObject block, Material targetMaterial)
+    {
+        if (targetMaterial == null) return;
+
+        MeshRenderer[] renderers = block.GetComponentsInChildren<MeshRenderer>(true);
+
+        foreach (MeshRenderer renderer in renderers)
+        {
+            renderer.sharedMaterial = targetMaterial;
+        }
     }
 
     private void UpdateGoldUI()

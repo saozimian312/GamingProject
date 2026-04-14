@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 5081523777098999875}
   - component: {fileID: 7104801043508892486}
   m_Layer: 6
-  m_Name: Enemy
+  m_Name: Enemy T
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -290,7 +290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37cfcf202c0df08439aa01397b3430a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2
+  moveSpeed: 1
   targetPoint: {fileID: 0}
   spawner: {fileID: 0}
 --- !u!114 &7104801043508892486
@@ -305,8 +305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 130b57c9ad25abc41a26e5737c4119b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  health: 3
-  goldReward: 10
+  health: 6
+  goldReward: 15
   hpText: {fileID: 3669891600930376710}
 --- !u!1 &6427981081938227962
 GameObject:

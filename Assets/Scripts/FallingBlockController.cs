@@ -50,11 +50,6 @@ public class FallingBlockController : MonoBehaviour
     {
         if (rb == null) return;
 
-        if ((hasStartedFalling || hasFinished) && !rb.useGravity)
-        {
-            rb.useGravity = true;
-        }
-
         Vector3 velocity = rb.linearVelocity;
 
         if (canControl)
@@ -64,11 +59,6 @@ public class FallingBlockController : MonoBehaviour
         else
         {
             velocity.x = 0f;
-
-            if (velocity.y > 0f)
-            {
-                velocity.y = 0f;
-            }
         }
 
         rb.linearVelocity = velocity;
@@ -112,17 +102,16 @@ public class FallingBlockController : MonoBehaviour
 
         Vector3 velocity = rb.linearVelocity;
         velocity.x = 0f;
-
-        if (velocity.y > 0f)
-        {
-            velocity.y = 0f;
-        }
-
         rb.linearVelocity = velocity;
 
         if (spawner != null)
         {
             spawner.ClearCurrentBlock(this);
+        }
+
+        if (heightManager != null)
+        {
+            heightManager.CheckHeight(GetHighestWorldY());
         }
 
         if (ShopManager.Instance != null)
@@ -133,17 +122,36 @@ public class FallingBlockController : MonoBehaviour
 
     public float GetHighestWorldY()
     {
-     Collider[] colliders = GetComponentsInChildren<Collider>();
-     float highestY = transform.position.y;
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        float highestY = transform.position.y;
 
-     foreach (Collider col in colliders)
+        foreach (Collider col in colliders)
         {
-        if (col.bounds.max.y > highestY)
-          {
-            highestY = col.bounds.max.y;
-          }
+            if (col.bounds.max.y > highestY)
+            {
+                highestY = col.bounds.max.y;
+            }
         }
 
-     return highestY;
+        return highestY;
+    }
+
+    public Vector3 GetEffectCenter()
+    {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        if (colliders == null || colliders.Length == 0)
+        {
+            return transform.position;
+        }
+
+        Bounds bounds = colliders[0].bounds;
+
+        for (int i = 1; i < colliders.Length; i++)
+        {
+            bounds.Encapsulate(colliders[i].bounds);
+        }
+
+        return bounds.center;
     }
 }
