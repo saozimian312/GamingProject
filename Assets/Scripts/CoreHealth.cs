@@ -3,39 +3,41 @@ using TMPro;
 
 public class CoreHealth : MonoBehaviour
 {
-    public int health = 10;
-    public TMP_Text coreHpText;
+    [Header("Core HP")]
+    public int maxHealth = 100;
+    public int currentHealth = 100;
+
+    public TMP_Text hpText;
 
     private void Start()
     {
-        UpdateUI();
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHpText();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int amount)
     {
-    health -= damage;
+        // amount > 0 = 扣血
+        // amount < 0 = 治疗
+        currentHealth -= amount;
 
-    if (health < 0)
-    {
-        health = 0;
-    }
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHpText();
 
-    UpdateUI();
-
-    if (health <= 0)
-{
-    if (GameStateManager.Instance != null)
-    {
-        GameStateManager.Instance.LoseGame();
-    }
-}
-    }
-
-    private void UpdateUI()
-    {
-        if (coreHpText != null)
+        if (currentHealth <= 0)
         {
-            coreHpText.text = "Core HP: " + health;
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.LoseGame();
+            }
+        }
+    }
+
+    private void UpdateHpText()
+    {
+        if (hpText != null)
+        {
+            hpText.text = "Core HP: " + currentHealth + "/" + maxHealth;
         }
     }
 }

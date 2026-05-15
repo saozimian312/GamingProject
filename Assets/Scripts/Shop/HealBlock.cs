@@ -3,44 +3,27 @@ using UnityEngine;
 public class HealBlock : MonoBehaviour
 {
     public int healAmount = 1;
-    public float interval = 2f;
+    public float healInterval = 2f;
 
-    private float timer;
-    private FallingBlockController fallingBlock;
-    private BlockVFX vfx;
+    private float timer = 0f;
+    private CoreHealth coreHealth;
 
-    private void Awake()
+    private void Start()
     {
-        fallingBlock = GetComponent<FallingBlockController>();
-        vfx = GetComponent<BlockVFX>();
+        coreHealth = FindAnyObjectByType<CoreHealth>();
     }
 
     private void Update()
     {
-        if (fallingBlock == null) return;
-        if (!fallingBlock.IsPlaced) return;
+        if (GameStateManager.Instance != null && GameStateManager.Instance.IsGameOver) return;
+        if (coreHealth == null) return;
 
         timer += Time.deltaTime;
 
-        if (timer >= interval)
+        if (timer >= healInterval)
         {
             timer = 0f;
-
-            CoreHealth core = FindAnyObjectByType<CoreHealth>();
-            if (core != null)
-            {
-                core.TakeDamage(-healAmount);
-            }
-
-            if (vfx != null)
-            {
-                vfx.FlashHeal();
-            }
-
-            if (VFXManager.Instance != null)
-            {
-                VFXManager.Instance.PlayHealAura(fallingBlock.GetEffectCenter());
-            }
+            coreHealth.TakeDamage(-healAmount);
         }
     }
 }

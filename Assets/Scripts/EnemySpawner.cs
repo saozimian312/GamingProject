@@ -4,36 +4,71 @@ using TMPro;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Header("Enemy Prefabs")]
     public GameObject normalEnemyPrefab;
     public GameObject fastEnemyPrefab;
     public GameObject tankEnemyPrefab;
 
+    [Header("Spawn")]
     public Transform spawnPoint;
     public Transform targetPoint;
     public TMP_Text waveText;
 
-    public int totalWaves = 5;
-    public int baseEnemiesPerWave = 3;
-    public int enemiesIncreasePerWave = 1;
+    [Header("Timing")]
     public float timeBetweenEnemies = 1f;
     public float timeBetweenWaves = 2f;
+
+    [Header("Spawn Offset")]
+    public float spawnRandomX = 0.4f;
+    public float spawnRandomZ = 0.2f;
+
+    private int totalWaves = 3;
+    private int baseEnemiesPerWave = 3;
+    private int enemiesIncreasePerWave = 1;
+
+    private int normalChance = 50;
+    private int fastChance = 30;
+    private int tankChance = 20;
 
     private int currentWave = 0;
     private int activeEnemies = 0;
     private bool isSpawning = false;
 
-    private void Start()
+    public void ApplyLevelConfig(LevelConfig config)
     {
+        if (config == null) return;
+
+        totalWaves = config.totalWaves;
+        baseEnemiesPerWave = config.baseEnemiesPerWave;
+        enemiesIncreasePerWave = config.enemiesIncreasePerWave;
+
+        normalChance = config.normalChance;
+        fastChance = config.fastChance;
+        tankChance = config.tankChance;
+    }
+
+    public void StartLevel()
+    {
+        StopAllCoroutines();
+
+        currentWave = 0;
+        activeEnemies = 0;
+        isSpawning = false;
+
         StartCoroutine(StartNextWave());
     }
 
     private IEnumerator StartNextWave()
     {
+        Debug.Log("StartNextWave called. currentWave = " + currentWave + ", totalWaves = " + totalWaves);
+
         if (currentWave >= totalWaves)
         {
-            if (GameStateManager.Instance != null)
+            Debug.Log("All waves finished, calling OnLevelCleared");
+
+            if (LevelManager.Instance != null)
             {
-                GameStateManager.Instance.WinGame();
+                LevelManager.Instance.OnLevelCleared();
             }
             yield break;
         }
@@ -49,11 +84,17 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < enemyCount; i++)
         {
-            GameObject enemyPrefabToSpawn = GetRandomEnemyPrefab();
+            GameObject prefabToSpawn = GetRandomEnemyPrefab();
 
-            if (enemyPrefabToSpawn != null)
+            if (prefabToSpawn != null && spawnPoint != null)
             {
-                GameObject enemy = Instantiate(enemyPrefabToSpawn, spawnPoint.position, Quaternion.identity);
+                Vector3 spawnOffset = new Vector3(
+                    Random.Range(-spawnRandomX, spawnRandomX),
+                    0f,
+                    Random.Range(-spawnRandomZ, spawnRandomZ)
+                );
+
+                GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position + spawnOffset, Quaternion.identity);
 
                 EnemyController controller = enemy.GetComponent<EnemyController>();
                 if (controller != null)
@@ -73,29 +114,31 @@ public class EnemySpawner : MonoBehaviour
 
     private GameObject GetRandomEnemyPrefab()
     {
-        int roll = Random.Range(0, 100);
+        int totalChance = normalChance + fastChance + tankChance;
+        int roll = Random.Range(0, totalChance);
 
-        // 你可以改这里的概率
-        if (roll < 50)
+        if (roll < normalChance)
         {
-            return normalEnemyPrefab; // 50%
+            return normalEnemyPrefab;
         }
-        else if (roll < 80)
+
+        roll -= normalChance;
+        if (roll < fastChance)
         {
-            return fastEnemyPrefab;   // 30%
+            return fastEnemyPrefab;
         }
-        else
-        {
-            return tankEnemyPrefab;   // 20%
-        }
+
+        return tankEnemyPrefab;
     }
 
     public void NotifyEnemyDestroyed()
     {
         activeEnemies--;
+        Debug.Log("Enemy removed. activeEnemies = " + activeEnemies);
 
         if (activeEnemies <= 0 && !isSpawning)
         {
+            Debug.Log("All enemies cleared, starting next wave");
             StartCoroutine(StartNextWave());
         }
     }

@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -8,25 +7,25 @@ public class EnemyHealth : MonoBehaviour
     public int goldReward = 10;
     public TMP_Text hpText;
 
-    private Renderer enemyRenderer;
-    private Color originalColor;
+    private EnemyController controller;
 
     private void Awake()
     {
-        enemyRenderer = GetComponent<Renderer>();
-        if (enemyRenderer != null)
-        {
-            originalColor = enemyRenderer.material.color;
-        }
+        controller = GetComponent<EnemyController>();
+        UpdateHpText();
+    }
 
-        UpdateHPText();
+    private void Start()
+    {
+        UpdateHpText();
     }
 
     public void TakeDamage(int damage)
     {
+        if (controller != null && controller.IsDead) return;
+
         health -= damage;
-        UpdateHPText();
-        StartCoroutine(FlashRed());
+        UpdateHpText();
 
         if (health <= 0)
         {
@@ -41,24 +40,21 @@ public class EnemyHealth : MonoBehaviour
             ShopManager.Instance.AddGold(goldReward);
         }
 
-        Destroy(gameObject);
+        if (controller != null)
+        {
+            controller.Die();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    private void UpdateHPText()
+    private void UpdateHpText()
     {
         if (hpText != null)
         {
             hpText.text = health.ToString();
-        }
-    }
-
-    private IEnumerator FlashRed()
-    {
-        if (enemyRenderer != null)
-        {
-            enemyRenderer.material.color = Color.red;
-            yield return new WaitForSeconds(0.1f);
-            enemyRenderer.material.color = originalColor;
         }
     }
 }

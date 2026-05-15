@@ -3,68 +3,71 @@ using UnityEngine;
 public class BlockSpawner : MonoBehaviour
 {
     public Transform dropPoint;
-    public MobileMoveInput mobileMoveInput;
     public HeightManager heightManager;
+    public MobileMoveInput mobileMoveInput;
 
-    public bool HasActiveBlock()
+    private FallingBlockController currentBlock;
+
+    public FallingBlockController SpawnBlock(GameObject prefab)
     {
-        if (mobileMoveInput == null) return false;
-        return mobileMoveInput.currentBlock != null;
-    }
+        if (prefab == null || dropPoint == null) return null;
 
-    public FallingBlockController SpawnBlock(GameObject blockPrefab)
-    {
-        if (blockPrefab == null)
+        GameObject blockObj = Instantiate(prefab, dropPoint.position, Quaternion.identity);
+
+        SetTagRecursively(blockObj.transform, "Block");
+
+        FallingBlockController controller = blockObj.GetComponent<FallingBlockController>();
+        if (controller != null)
         {
-            Debug.LogError("BlockSpawner: blockPrefab 没有指定。");
-            return null;
-        }
+            controller.spawner = this;
+            controller.heightManager = heightManager;
 
-        if (dropPoint == null)
-        {
-            Debug.LogError("BlockSpawner: dropPoint 没有指定。");
-            return null;
-        }
+            currentBlock = controller;
 
-        if (HasActiveBlock())
-        {
-            Debug.Log("BlockSpawner: 当前已经有活动方块，不能生成新方块。");
-            return null;
-        }
-
-        GameObject newBlock = Instantiate(blockPrefab, dropPoint.position, Quaternion.identity);
-
-        FallingBlockController controller = newBlock.GetComponent<FallingBlockController>();
-
-        if (controller == null)
-        {
-            Debug.LogError("BlockSpawner: 生成的 prefab 根物体上没有 FallingBlockController。");
-            Destroy(newBlock);
-            return null;
-        }
-
-        controller.spawner = this;
-        controller.heightManager = heightManager;
-
-        if (mobileMoveInput != null)
-        {
-            mobileMoveInput.currentBlock = controller;
-        }
-        else
-        {
-            Debug.LogWarning("BlockSpawner: mobileMoveInput 没有指定，方块会生成，但不能被按钮控制。");
+            if (mobileMoveInput != null)
+            {
+                mobileMoveInput.currentBlock = controller;
+            }
         }
 
         return controller;
     }
 
+    private void SetTagRecursively(Transform root, string tagName)
+    {
+        root.gameObject.tag = tagName;
+
+        foreach (Transform child in root)
+        {
+            SetTagRecursively(child, tagName);
+        }
+    }
+
     public void ClearCurrentBlock(FallingBlockController block)
     {
-        if (mobileMoveInput == null) return;
+        if (block == null) return;
 
-        if (mobileMoveInput.currentBlock == block)
+        if (currentBlock == block)
+        {
+            currentBlock = null;
+        }
+
+        if (mobileMoveInput != null && mobileMoveInput.currentBlock == block)
         {
             mobileMoveInput.currentBlock = null;
         }
+    }
+
+    public bool HasActiveBlock()
+    {
+        if (currentBlock == null) return false;
+
+        if (currentBlock.IsPlaced)
+        {
+            ClearCurrentBlock(currentBlock);
+            return false;
+        }
+
+        return true;
     }
 }

@@ -10,7 +10,7 @@ public class HeightManager : MonoBehaviour
     public float spawnOffsetY = 5f;
     public float minDropPointY = 8f;
 
-    [Header("相机设置")]
+    [Header("基础相机跟随")]
     public float cameraFollowUpFactor = 0.3f;
     public float cameraFollowBackFactor = 0.4f;
     public float lookTargetYOffset = 2f;
@@ -18,7 +18,7 @@ public class HeightManager : MonoBehaviour
     [Header("额外补偿（防止看不到 DropPoint）")]
     public float extraVisibleMargin = 3f;
     public float extraUpFactor = 0.5f;
-    public float extraBackFactor = 0.6f;
+    public float extraBackFactor = 0.35f;
 
     private Vector3 baseCameraPos;
     private Vector3 baseDropPointPos;
@@ -34,6 +34,8 @@ public class HeightManager : MonoBehaviour
         {
             baseDropPointPos = dropPoint.position;
         }
+
+        ResetForNewLevel();
     }
 
     public void UpdateForNextSpawn()
@@ -62,17 +64,41 @@ public class HeightManager : MonoBehaviour
         {
             float dropRise = targetDropY - baseDropPointPos.y;
 
+            float baseUp = dropRise * cameraFollowUpFactor;
+            float baseBack = dropRise * cameraFollowBackFactor;
+
             float overHeight = Mathf.Max(
                 0f,
                 targetDropY - (focusTarget.position.y + extraVisibleMargin)
             );
 
+            float extraUp = overHeight * extraUpFactor;
+            float extraBack = overHeight * extraBackFactor;
+
             Vector3 newCameraPos = baseCameraPos;
-            newCameraPos.y += dropRise * cameraFollowUpFactor + overHeight * extraUpFactor;
-            newCameraPos.z -= dropRise * cameraFollowBackFactor + overHeight * extraBackFactor;
+            newCameraPos.y += baseUp + extraUp;
+            newCameraPos.z -= baseBack + extraBack;
 
             mainCamera.transform.position = newCameraPos;
             mainCamera.transform.LookAt(focusTarget.position + Vector3.up * lookTargetYOffset);
+        }
+    }
+
+    public void ResetForNewLevel()
+    {
+        if (dropPoint != null)
+        {
+            dropPoint.position = baseDropPointPos;
+        }
+
+        if (mainCamera != null)
+        {
+            mainCamera.transform.position = baseCameraPos;
+
+            if (focusTarget != null)
+            {
+                mainCamera.transform.LookAt(focusTarget.position + Vector3.up * lookTargetYOffset);
+            }
         }
     }
 
@@ -96,8 +122,9 @@ public class HeightManager : MonoBehaviour
         return highestY;
     }
 
-    // 保留旧接口，避免你别的代码还在调用时报错
+    // 保留旧接口，防止别的脚本还在调用
     public void CheckHeight(float _)
     {
+        UpdateForNextSpawn();
     }
 }

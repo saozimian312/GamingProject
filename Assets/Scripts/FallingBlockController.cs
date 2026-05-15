@@ -88,7 +88,7 @@ public class FallingBlockController : MonoBehaviour
 
         if (ShopManager.Instance != null)
         {
-            ShopManager.Instance.RefreshOffers();
+            ShopManager.Instance.OnCurrentBlockFinished();
         }
     }
 
@@ -116,7 +116,7 @@ public class FallingBlockController : MonoBehaviour
 
         if (ShopManager.Instance != null)
         {
-            ShopManager.Instance.RefreshOffers();
+            ShopManager.Instance.OnCurrentBlockFinished();
         }
     }
 

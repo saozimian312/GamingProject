@@ -1,46 +1,90 @@
 using UnityEngine;
 using TMPro;
 
+
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance;
 
     public bool IsGameOver { get; private set; }
+
     public TMP_Text resultText;
+    public GameObject centerMessagePanel;
 
     private void Awake()
     {
         Instance = this;
 
-        if (resultText != null)
+        
+        Time.timeScale = 1f;
+
+        if (centerMessagePanel != null)
         {
-            resultText.gameObject.SetActive(false);
+            centerMessagePanel.SetActive(false);
         }
     }
 
     public void WinGame()
     {
-        if (IsGameOver) return;
+    if (IsGameOver) return;
 
-        IsGameOver = true;
+    IsGameOver = true;
+    Time.timeScale = 0f;
 
-        if (resultText != null)
-        {
-            resultText.gameObject.SetActive(true);
-            resultText.text = "You Win";
-        }
+    if (resultText != null)
+       {
+        resultText.text = "You Win";
+       } 
+
+    if (centerMessagePanel != null)
+       {
+        centerMessagePanel.SetActive(true);
+       }
+
+    if (restartButtonObject != null)
+       {
+        restartButtonObject.SetActive(false);
+       }
     }
 
+    public GameObject restartButtonObject;
+
     public void LoseGame()
+   {
+    if (IsGameOver) return;
+
+    IsGameOver = true;
+    Time.timeScale = 0f;
+
+    if (resultText != null)
+       {
+        resultText.text = "Game Over";
+       }
+
+    if (centerMessagePanel != null)
+       {
+        centerMessagePanel.SetActive(true);
+       }
+
+    if (restartButtonObject != null)
+       {
+        restartButtonObject.SetActive(true);
+       }
+    }
+
+    private void PauseGame()
     {
-        if (IsGameOver) return;
+        Time.timeScale = 0f;
+    }
 
-        IsGameOver = true;
+    public void ResetGameState()
+    {
+    IsGameOver = false;
+    Time.timeScale = 1f;
 
-        if (resultText != null)
-        {
-            resultText.gameObject.SetActive(true);
-            resultText.text = "Game Over";
-        }
+    if (restartButtonObject != null)
+       {
+        restartButtonObject.SetActive(false);
+       }
     }
 }

@@ -2,43 +2,24 @@ using UnityEngine;
 
 public class IncomeBlock : MonoBehaviour
 {
-    public int goldPerTick = 5;
-    public float interval = 2f;
+    public int goldAmount = 5;
+    public float incomeInterval = 2f;
 
-    private float timer;
-    private FallingBlockController fallingBlock;
-    private BlockVFX vfx;
-
-    private void Awake()
-    {
-        fallingBlock = GetComponent<FallingBlockController>();
-        vfx = GetComponent<BlockVFX>();
-    }
+    private float timer = 0f;
 
     private void Update()
     {
-        if (fallingBlock == null) return;
-        if (!fallingBlock.IsPlaced) return;
+        if (GameStateManager.Instance != null && GameStateManager.Instance.IsGameOver) return;
 
         timer += Time.deltaTime;
 
-        if (timer >= interval)
+        if (timer >= incomeInterval)
         {
             timer = 0f;
 
             if (ShopManager.Instance != null)
             {
-                ShopManager.Instance.AddGold(goldPerTick);
-            }
-
-            if (vfx != null)
-            {
-                vfx.FlashIncome();
-            }
-
-            if (VFXManager.Instance != null)
-            {
-                VFXManager.Instance.PlayIncomeBurst(fallingBlock.GetEffectCenter());
+                ShopManager.Instance.AddGold(goldAmount);
             }
         }
     }
